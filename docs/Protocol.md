@@ -65,8 +65,8 @@ The engraving's reference transaction is a **capstone transaction**. Using it a 
 determistically and in bounded time retrieve each chunk's constituent transaction. Keystone
 transactions must conform to a specific structure to be considered valid:
 
-* Inputs - Comprehensive list of cornerstone transactions (defined below) and nothing
-  other than cornerstone transactions.
+* Inputs - Root transactions of any and all ribbons (see below) in the engraving. Must
+  only contain ribbon root transactions. 
 * First output - Any value sent to the document address
 * Second output - Null data containing the metadata tag (defined below)
 * Additional outputs - Ignored (but reserved for future protocol implementations, and
@@ -111,9 +111,30 @@ The following fields are included in the size bound field:
   Only required to be an upper bound, but implementations should make tight or equal to the
   actual value.
 
-## Cornerstone Transaction
+## Scroll and Cornerstones
 
-A single engraving contains 1-N **cornerstone transactions**. Each cornerstone transaction acts
-as the root node in a tree of **chunk transactions**. A chunk transaction is a transaction which
-commits one or more chunks from the document's chunk set to the block chain in a null data output.
-(As of now the Bitcoin protocol only supports one null data output per transaction).
+The **scroll** is the bounded directed acycling graph (DAG) of transactions rooted at the capstone 
+transaction. The scroll contains all chunks from the document's chunk set. Each chunk is represented
+in the scroll by one or more **chunk transactions**. Any transaction in the scroll with null data in
+the first ouput is by definition a chunk transction. The reader client adds its data to the chunk set
+when reconstructing the document. Chunks may be duplicated on multiple transactions, and only one
+copy should be included in the chunk set. Chunks may occur in any order in the scroll.
+
+Any transaction in the scroll must only contain inputs from another transaction in the scroll or a
+**cornerstone transaction**. A cornerstone transaction is a terminal node in the scroll's DAG, and
+its input notes should not be processed. A cornerstone transaction is identified by any transaction
+with null data in its last output containing the following big endian plaintext stamp: 
+
+*BitScribeCornerstone*
+
+
+
+A **ribbon** is any bounded directed acycling graph (DAG) of transactions rooted at either the
+capstone transaction or another ribbon's transaction. The engraving **ribbot set** are all the 
+ribbons rooted at the inputs of the capstone transactions. Two ribbons in the same engraivng can share a merged
+child DAG. A ribbon can split off into aribitrarily multiple sub-DAGs at any nodes. A transaction
+in the ribbon set must either 
+
+A **chunk transaction** is any transaction with
+null data containing a chunk from the document's chunk set. All **chunk transactions
+the engraving (and therefore all rooted at the capstone transaction inputs). 
