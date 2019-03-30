@@ -123,9 +123,8 @@ copy should be included in the chunk set. Chunks may occur in any order in the s
 Any transaction in the scroll must only contain inputs from another transaction in the scroll or a
 **cornerstone transaction**. A cornerstone transaction is a terminal node in the scroll's DAG, and
 its input notes should not be processed. A cornerstone transaction is identified by any transaction
-with null data in its last output containing the following big endian plaintext stamp: 
-
-*BitScribeCornerstone*
+with null data in its last output containing the following big endian plaintext stamp 
+`BitScribeCornerstone`
 
 Any transaction in the scroll (including the roots and cornerstones) are **scroll nodes**. A scroll 
 node may have input nodes to one or multiple scroll nodes. A scroll node must not have any non-scroll
