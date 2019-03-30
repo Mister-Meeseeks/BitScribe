@@ -59,7 +59,7 @@ the user simply uses the first valid one. This also allows for multiple engravin
 chunk codecs. Since the engraving includes this metadata the user can use the available or most
 efficient chunk codec.
 
-## Keystone Transaction
+## Capstone Transaction
 
 The engraving's reference transaction is a **capstone transaction**. Using it a reader can
 determistically and in bounded time retrieve each chunk's constituent transaction. Keystone
@@ -113,4 +113,7 @@ The following fields are included in the size bound field:
 
 ## Cornerstone Transaction
 
-
+A single engraving contains 1-N **cornerstone transactions**. Each cornerstone transaction acts
+as the root node in a tree of **chunk transactions**. A chunk transaction is a transaction which
+commits one or more chunks from the document's chunk set to the block chain in a null data output.
+(As of now the Bitcoin protocol only supports one null data output per transaction).
