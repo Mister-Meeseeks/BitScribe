@@ -127,14 +127,3 @@ with null data in its last output containing the following big endian plaintext 
 
 *BitScribeCornerstone*
 
-
-
-A **ribbon** is any bounded directed acycling graph (DAG) of transactions rooted at either the
-capstone transaction or another ribbon's transaction. The engraving **ribbot set** are all the 
-ribbons rooted at the inputs of the capstone transactions. Two ribbons in the same engraivng can share a merged
-child DAG. A ribbon can split off into aribitrarily multiple sub-DAGs at any nodes. A transaction
-in the ribbon set must either 
-
-A **chunk transaction** is any transaction with
-null data containing a chunk from the document's chunk set. All **chunk transactions
-the engraving (and therefore all rooted at the capstone transaction inputs). 
