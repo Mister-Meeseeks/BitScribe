@@ -147,6 +147,21 @@ to the metadata size bound.
 
 ## Write Efficiency
 
+A large document requires a large number of chunk transactions. We want to reasonably tradeoff between
+time and money efficiency to keep the engraving process efficient. The best way to do this is to sacrfice
+chunk write latency for in favor of chunk write bandwidth. Transaction fees are much lower if we're willing
+to accept high expected confirmation times. 
+
+If chunks are sent in sequence this would result in very long times to write even small documents. Therefore
+the key is support writing a large number of blocks in parrallel. This allows us to set low transaction fees
+while keeping total completion time short.
+
+The protocol supports this through two design choices. First chunk order does not matter. Therefore we're
+free to send chunk transactions as soon as we're ready, without dependency on completing any specific
+prior chunks. Second the DAG nature of the scroll supports committing transactions in parrallel, then merging
+them at the end. We can high an arbitrarily large number of threads committing blocks in parrallel at any
+given block confirmation.
+
 ## Write Corruption Safety
 
 One vector of attack is the possibility of corrupting the engraving while its being written. A malicious 
