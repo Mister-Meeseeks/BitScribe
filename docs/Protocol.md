@@ -101,13 +101,13 @@ this makes the attack cost of Sybil attacks on a document impractically high.
 
 The following fields are included in the size bound field:
 
-* N Chunks (4 bytes) - Big endian integer of the total size of the chunk set. Since an engraving
+* [N Chunks] (4 bytes) - Big endian integer of the total size of the chunk set. Since an engraving
   can contain duplicate transactions, the total number of chunk-containing transactions may
   be higher.
-* N Hops (4 bytes) - Big endian integer of the number of transactions (chunk containing or not)
+* [N Hops] (4 bytes) - Big endian integer of the number of transactions (chunk containing or not)
   contained in the entire engraving. Protocol only requires an upper bound, but implementations
   should try to make this equal or as tight as possible to the actual value.
-* Longest Chain (4 bytes) - Big endian integer of the longest transaction path in engraving.
+* [Longest Chain] (4 bytes) - Big endian integer of the longest transaction path in engraving.
   Only required to be an upper bound, but implementations should make tight or equal to the
   actual value.
 
