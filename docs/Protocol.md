@@ -65,7 +65,7 @@ The engraving's reference transaction is a **capstone transaction**. Using it a 
 determistically and in bounded time retrieve each chunk's constituent transaction. Keystone
 transactions must conform to a specific structure to be considered valid:
 
-* Inputs - Root transactions of any and all ribbons (see below) in the engraving. Must
+* Inputs - Complete set of root transactions for the scroll (see below) in the engraving. Must
   only contain ribbon root transactions. 
 * First output - Any value sent to the document address
 * Second output - Null data containing the metadata tag (defined below)
