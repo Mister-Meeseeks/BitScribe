@@ -127,3 +127,21 @@ with null data in its last output containing the following big endian plaintext 
 
 *BitScribeCornerstone*
 
+Any transaction in the scroll (including the roots and cornerstones) are **scroll nodes**. A scroll 
+node may have input nodes to one or multiple scroll nodes. A scroll node must not have any non-scroll
+inputs. A scroll node may have outputs to zero (if a root), one, or multiple scroll nodes. It may 
+have outputs to one or more non-scroll transactions. Only the sequential inputs, starting at the
+capstone transaction, should be read by the client when deciphering the scroll. Outputs should be
+ignored (if they were in the scroll they'd be processed in the path to reaching that node).
+
+When walking through the scroll, the read client should respect the size bounds set by the metadata tag.
+If the longest path or total size of the transaction set exceeds the size bound the engraving should
+be disregarded as invalid, without further processing. This prevents malicious traps where an attacker
+creates a very very long scroll to penalize the cost of reading the document. The metadata tag lets the
+read client know the size up front, and abandon the attempt if an error or attack violates that.
+
+A scroll node may have outputs to two or more parent scroll nodes. In which case the read client will
+reach it multiple times. For efficiency the read client should only process it once. (Duplicated
+chunks should alwyas be safe, even if they occur on separate transactions). If multiple parents converge
+to a single child, the child node and all grandchildren nodes should be considered only once when comparing
+to the metadata size bound.
