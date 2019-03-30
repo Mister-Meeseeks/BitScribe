@@ -2,7 +2,9 @@
 # Recovering Writes in Progress
 
 This describes an optional extension to the BitScribe protocol. It allows for
-an in-progress engraving to be resumed, at an arbitrarily later writer.
+an in-progress engraving to be resumed, at an arbitrarily later writer. Use or non-use
+of this extension does not affect the ability of base protocol compliant clients to read 
+completed engravings.
 
 Write interruption poses no additional cost in terms of money or time. As long as the
 previous writer was compliant with the protocol extension, any other writer can resume
