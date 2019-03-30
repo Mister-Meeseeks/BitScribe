@@ -144,3 +144,26 @@ reach it multiple times. For efficiency the read client should only process it o
 chunks should alwyas be safe, even if they occur on separate transactions). If multiple parents converge
 to a single child, the child node and all grandchildren nodes should be considered only once when comparing
 to the metadata size bound.
+
+## Write Efficiency
+
+## Write Corruption Safety
+
+One vector of attack is the possibility of corrupting the engraving while its being written. A malicious 
+attacker may observe the blockchain over time and an engraving attempt in real-time. As the chunks are
+written over time, the engraving may not finish until much later after the attempt is visible.
+
+However the structure of the protocol prevents any outside user without access to the writer's private keys
+from corrupting the engraved structure. As long as the writer's transactions are accepted by the blockchain
+he can guarantee the ability to finish the engraving, even if the attempt is publicly known before it even
+starts.
+
+An engraving is just a collection of transaction series. As long as the writer makes each transaction in the 
+series output to an address under his control, then there's no way that a third party can alter the process. 
+From the cornerstone to the signature at the document address, an engraving write attempt is secure if and only 
+if the writer controls the UTXOs at each step. 
+
+A third party can write forged or mal-formed engravings to the document address, in an attempt to muddle the
+ability to reconstruct the document. However the cost of blockchain reads is very cheap relative to blockchain
+writes. (And size bounds makes each engraving candidate read bounded in constant time.) So an attack like
+this would cost very much, for very minimal computation time costs to reader clients.
