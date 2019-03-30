@@ -162,7 +162,7 @@ prior chunks. Second the DAG nature of the scroll supports committing transactio
 them at the end. We can high an arbitrarily large number of threads committing blocks in parrallel at any
 given block confirmation.
 
-## Write Corruption Safety
+## Attacks on Writes in Progress
 
 One vector of attack is the possibility of corrupting the engraving while its being written. A malicious 
 attacker may observe the blockchain over time and an engraving attempt in real-time. As the chunks are
