@@ -74,7 +74,7 @@ transactions must conform to a specific structure to be considered valid:
 
 ## Metadata Tag
 
-The *metadata tag* is a byte string describing the version of the protocol used to make
+The **metadata tag** is a byte string describing the version of the protocol used to make
 the engraving, the chunk codec, and the *size bounds* of the structure. The byte array
 is structured as follows in Big Endian order:
 
