@@ -6,7 +6,7 @@ represent a single document across multiple transactions, and a method for recov
 that document using only the canonical blockchain. The protocol is designed to be highly 
 resilient against forgers, censors, and other forms of motivated attacks.
 
-## Documents and Chunks
+## Documents
 
 The fundamental element of BitScribe are documents. A **document** is any standalone sequence 
 of digital data. In practice BitScribe is optimized for documents between 1KB to 1MB in size. 
@@ -16,23 +16,31 @@ overhead. Support exists for documents up to 1 GB or 10 million transactions, bu
 writing such large chunks of data would be impractical and costly in terms of time and
 money. 
 
-Documents are divisible into **chunks**, which are sub-units of data small enough to fit within
-a single transaction. A document's **chunk set** is a unique set of individual chunks from which 
-the document can be fully recovered. Chunk sets by definition cannot contain duplicate chunks.
-The higher-layer protocol to encode/decode chunks into documents is the *chunk codec*. Bitscribe
-protocol is agnostic about the chunk codec used. (The library includes some default implementations
-though.)
-
-A **document hash** is the cryptographic hash derived from the blockchain's hasing primitive
-(SHA256 for Bitcoin). A **document address** is the blockchain address determinstically derived
-from the document's hash.
+A **document hash** is the cryptographic hash of the documwnt using the blockchain's native 
+hasing primitive (SHA256 for Bitcoin). A **document address** is the blockchain address 
+determinstically derived from the document's hash. 
 
 After being engraved into the blockchain, the user can reconstruct the original document
 given:
 
 * The document's hash
 * Read access to the blockchain
-* Chunk decoder algorithm used in the engraving
+
+A **dimunitive address** is the address mapping to the first N-bits of the document hash.
+The 92-bit dimunitive address is the address derived from the first 92-bits of the SHA256
+hash, with the trailing bits set to 0. A 256-bit hash has 255 defined dimunitive addresses.
+
+The purpose of dimunitive addresses are to allowed documents to be located and shared using
+fewer number of bits. At the cost of potentially higher probability of collission. However
+in the case of collission, the client can always retry with more bits. 
+
+## Encoding Chunks
+
+Documents are divisible into **chunks**, which are sub-units of data small enough to fit within
+a single transaction. A **chunk scheme** is metadata that describes how to encode and decode
+a document to and from a set of chunks. A document and chunk scheme uniquely define a **chunk
+set**. 
+
 
 ## Engravings
 
