@@ -1,5 +1,5 @@
 
-from bitscribe.evolution import *
+from bitscribe.tx_state import *
 import pytest
 
 @pytest.mark.parametrize("time_events,is_dead", [
