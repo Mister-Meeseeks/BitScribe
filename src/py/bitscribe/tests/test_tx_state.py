@@ -146,12 +146,16 @@ def test_tx_state_rollback_step_down():
     sm = TxNetworkStateMachine(confirm_blocks=5,
                                reorg_timeout=60, reorg_tries=2,
                                mempool_timeout=60, mempool_tries=2)
-    sm.confirmBlock(3, 0)
+    sm.confirmBlock(7, 0)
     sm.offNetwork(0)
     assert sm.state() == TxNetworkState.CONFIRMED
     sm.offNetwork(60)
     assert sm.state() == TxNetworkState.SOFT_CONFIRMED
     sm.offNetwork(120)
-    assert sm.state() == TxNetworkState.PENDING
+    assert sm.state() == TxNetworkState.SOFT_CONFIRMED
     sm.offNetwork(180)
+    assert sm.state() == TxNetworkState.PENDING
+    sm.offNetwork(240)
+    assert sm.state() == TxNetworkState.PENDING
+    sm.offNetwork(300)
     assert sm.state() == TxNetworkState.DEAD

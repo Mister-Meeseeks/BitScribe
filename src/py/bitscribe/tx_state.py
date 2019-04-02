@@ -89,11 +89,17 @@ class TxNetworkStateMachine:
             self._state = self.State.DEAD
 
     def txReplaced (self):
-        pass
+        if (self._state >= self.State.SOFT_CONFIRM):
+            raise Exception("A confirmed transaction cannot be replaced")
+        self._replaced = True
 
     def undoReplaced (self):
-        pass
+        self._replaced = False
 
+    def _assertReplaceConflict (self, level):
+        if (self._replaced and level >= self.State.SOFT_CONFIRM):
+            raise Exception("A replaced transaction cannot be confirmed")
+        
     # Only call this on transactions lookups with 0 confirmed blocks 
     def inMempool (self, unix_epoch):
         self._touchLevel(unix_epoch, self.State.MEMPOOL)
@@ -103,7 +109,7 @@ class TxNetworkStateMachine:
             self._softConfirm(unix_epoch)
         else:
             self._hardConfirm(unix_epoch)
-
+            
     def _softConfirm (self, unix_epoch):
         self._touchLevel(unix_epoch, self.State.SOFT_CONFIRM)
 
@@ -114,6 +120,7 @@ class TxNetworkStateMachine:
         if (self._state > level):
             self._backtrack(unix_epoch)
         else:
+            self._assertReplaceConflict(level)
             self._state = level
             self._getTimeout().alive(unix_epoch)
         
