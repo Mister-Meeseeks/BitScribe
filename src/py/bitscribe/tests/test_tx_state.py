@@ -41,13 +41,12 @@ def test_tx_state_transmit():
 
 def test_tx_state_no_transmit():
     sm = TxNetworkStateMachine()
-    sm.declineTrasmit()
+    sm.declineTransmit()
     assert sm.state() == TxNetworkState.DEAD
 
 def test_tx_pre_transmit_off_net():
-    sm = TxNetworkStateMachine()
-    sm.transmit()
-    sm.offNetwork(60)
+    sm = TxNetworkStateMachine(transmit_timeout=60)
+    sm.offNetwork(120)
     assert sm.state() == TxNetworkState.PENDING
     
 def test_tx_state_reject():
@@ -55,7 +54,7 @@ def test_tx_state_reject():
     sm.rejectResponse()
     assert sm.state() == TxNetworkState.DEAD
     
-def test_tx_state_trasmit_timeouit():
+def test_tx_state_trasmit_timeout():
     sm = TxNetworkStateMachine(transmit_timeout=60)
     sm.transmit(10)
     sm.offNetwork(69)

@@ -20,19 +20,17 @@ class TxNetworkStateMachine:
                   reorg_timeout=300, reorg_tries=5):
         self._confirm_blocks = confirm_blocks
         self._transmit_timeout = transmit_timeout
-        self._timeouts = self._initTimeouts((mempool_timeout, mempool_tries),
-                                            (reorg_timeout, reorg_tries))
+        self._timeouts = self._initTimeouts((mempool_tries, mempool_timeout),
+                                            (reorg_tries, reorg_timeout))
         self._state = self.State.PRE_TRANSMIT
         self._replaced = False
 
     @classmethod
-    def _initTimeouts (cls, (mem_time, mem_tries), (reorg_time, reorg_tries)):
+    def _initTimeouts (cls, (mem_try, mem_time), (ro_try, ro_time)):
         return { cls.State.DEAD: RetryTimeoutState(0, 0),
-                 cls.State.MEMPOOL: RetryTimeoutState(mem_time, mem_tries),
-                 cls.State.SOFT_CONFIRMED: RetryTimeoutState(reorg_time,
-                                                             reorg_tries),
-                 cls.State.HARD_CONFIRMED: RetryTimeoutState(reorg_time,
-                                                             reorg_tries) }
+                 cls.State.MEMPOOL: RetryTimeoutState(mem_try, mem_time),
+                 cls.State.SOFT_CONFIRM: RetryTimeoutState(ro_try, ro_time),
+                 cls.State.HARD_CONFIRM: RetryTimeoutState(ro_try, ro_time) }
         
     def state (self):
         if (self._replaced):
@@ -44,12 +42,12 @@ class TxNetworkStateMachine:
     def _translate (cls, state):
         if (state <= cls.State.DEAD):
             return TxNetworkState.DEAD
-        elif (state >= cls.HARD_CONFIRMED):
+        elif (state >= cls.State.HARD_CONFIRM):
             return TxNetworkState.CONFIRMED
-        elif (state == cls.SOFT_CONFIRMED):
+        elif (state == cls.State.SOFT_CONFIRM):
             return TxNetworkState.SOFT_CONFIRMED
         else:
-            return TXNetworkState.PENDING
+            return TxNetworkState.PENDING
                               
     def transmit (self, unix_epoch):
         self._transmit_time = unix_epoch
@@ -70,14 +68,14 @@ class TxNetworkStateMachine:
             self._backtrack(unix_epoch)
 
     def _unreceived (self, unix_epoch):
-        if (unix_epoch >= self._trasmit_time + self._transmit_timeout):
+        if (unix_epoch >= self._transmit_time + self._transmit_timeout):
             self._state = self.State.DEAD
 
     def _backtrack (self, unix_epoch):
         self._getTimeout().fail(unix_epoch)
-        if (self._timeout.isDead()):
+        if (self._getTimeout().isDead()):
             self._dropLevel()
-            self._getTimeout.alive(unix_epoch) # Reset timeout...
+            self._getTimeout().alive(unix_epoch) # Reset timeout...
 
     def _getTimeout (self):
         return self._timeouts[self._state]
@@ -124,8 +122,8 @@ class TxNetworkStateMachine:
         PRE_TRANSMIT = 2
         IN_FLIGHT = 3
         MEMPOOL = 4
-        SOFT_CONFIRMED = 5
-        HARD_CONFIRMED = 6
+        SOFT_CONFIRM = 5
+        HARD_CONFIRM = 6
 
         
 # Use this class for unexpected state changes that we want to re-confirm
