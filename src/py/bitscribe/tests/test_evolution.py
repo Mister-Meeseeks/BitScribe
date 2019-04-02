@@ -3,6 +3,7 @@ from bitscribe.evolution import *
 import pytest
 
 @pytest.mark.parametrize("time_events,is_dead", [
+    ([], False),
     ([(70, False)], False),
     ([(60, False), (120, False), (180, False)], True),
     ([(60, False), (120, True), (180, False)], False),

@@ -58,18 +58,24 @@ class TxNetworkStateMachine:
 class RetryTimeoutState:
     def __init__ (self, n_tries, timeout_secs):
         self._n_tries = n_tries
-        self._timeout = timeout_secs 
+        self._timeout = timeout_secs
+        self._nth_fail = 0
 
     def isDead (self):
-        pass
+        return self._nth_fail >= self._n_tries
 
     # Class state is inherently optimistic. One sign of life, even if previously
     # dead is enough for us to declare life.
     def alive (self, unix_epoch):
-        pass
+        self._nth_fail = 0
     
     # State is inherently optimistic. Caller has to fail multiple times
     # over a long-enough time range before we declare death.
     def fail (self, unix_epoch):
-        pass
+        if (self._nth_fail == 0):
+            self._nth_fail = 1
+            self._last_fail = unix_epoch
+        elif (unix_epoch >= self._last_fail + self._timeout):
+            self._nth_fail = self._nth_fail + 1
+            self._last_tail = unix_epoch
         
