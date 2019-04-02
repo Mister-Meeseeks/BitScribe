@@ -1,5 +1,5 @@
 # BitScribe
-Censorship-free way to permanetely engrave data on Bitcoin (and Bitcoin-like) blockchains.
+Censorship-free way to permanetely embed data on Bitcoin (and Bitcoin-like) blockchains.
 
 Bitcoin allows for arbitrary data inside individual transactions, but limits their size to
 80 bytes. This project defines a protocol and provides a reference implementation for writing
