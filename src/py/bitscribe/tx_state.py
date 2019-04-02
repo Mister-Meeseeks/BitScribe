@@ -1,4 +1,6 @@
 
+# Module for tracking and updating the last known state of specific transactions
+# on the network over time.
 
 # Describes the high-level state of a specific transaction as it relates to the
 # Bitcoin network at a specific time.
