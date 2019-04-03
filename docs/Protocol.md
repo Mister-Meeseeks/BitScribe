@@ -9,22 +9,27 @@ resilient against forgers, censors, and other forms of motivated attacks.
 ## Documents
 
 The fundamental element of BitScribe are documents. A **document** is any standalone sequence 
-of digital data. In practice BitScribe is optimized for documents between 1KB to 1MB in size. 
+of digital data. In practice BitScribe is optimized for documents between 1KB to 100MB in size. 
 Smaller documents can be more practically written using a single transaction
 (80 bytes in Bitcoin v0.12) or a small number of transactions with less representational
-overhead. Support exists for documents up to 1 GB or 10 million transactions, but fully 
-writing such large chunks of data would be impractical and costly in terms of time and
-money. 
+overhead. Support exists for documents of arbitrary size, but committing the full data set
+to the blockchain is impractical in terms of time and money. 
 
-A **document hash** is the cryptographic hash of the documwnt using the blockchain's native 
+A **document hash** is the cryptographic hash of the document using the blockchain's native 
 hasing primitive (SHA256 for Bitcoin). A **document address** is the blockchain address 
-determinstically derived from the document's hash. 
+determinstically derived from the document's hash. The 
+
+The purpose of using this address is to prevent forgeries or spam attacks. After reconstructing 
+a document, the client can verify that its contents hash to the source address. If not, that 
+specific read can be discarded as forged or erroenous.
 
 After being engraved into the blockchain, the user can reconstruct the original document
 given:
 
 * The document's hash
 * Read access to the blockchain
+
+## Dimunitive Address
 
 A **dimunitive address** is the address mapping to the first N-bits of the document hash.
 The 92-bit dimunitive address is the address derived from the first 92-bits of the SHA256
@@ -39,8 +44,8 @@ in the case of collission, the client can always retry with more bits.
 Documents are divisible into **chunks**, which are sub-units of data small enough to fit within
 a single transaction. A **chunk scheme** is metadata that describes how to encode and decode
 a document to and from a set of chunks. A document and chunk scheme uniquely define a **chunk
-set**. 
-
+set**. All chunks within a chunk set are unique, allowing for the same chunk to be duplicated
+in a dataset without fear of corrupting the document reconstruction.
 
 ## Engravings
 
