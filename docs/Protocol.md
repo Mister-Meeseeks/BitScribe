@@ -6,30 +6,39 @@ represent a single document across multiple transactions, and a method for recov
 that document using only the canonical blockchain. The protocol is designed to be highly 
 resilient against forgers, censors, and other forms of motivated attacks.
 
-## Documents
+## Documents, Engravings, and Blockchains
 
-The fundamental element of BitScribe are documents. A **document** is any standalone sequence 
-of digital data. In practice BitScribe is optimized for documents between 1KB to 100MB in size. 
-Smaller documents can be more practically written using a single transaction
-(80 bytes in Bitcoin v0.12) or a small number of transactions with less representational
-overhead. Support exists for documents of arbitrary size, but committing the full data set
-to the blockchain is impractical in terms of time and money. 
+A **document** is the fundamental element of data. It represents any arbitrary peice of
+standalone digital content. Although the term "document" is used, it can be multimedia,
+executable binaries, filesystem image, or anything else. 
+
+The **blockchain** is the pre-existing, canonical, distributed consensus ledger, whose
+aggregate proof-of-work or other mining related barriers makes it next economically 
+infeasible to alter blocks after they're committed. For the rest of this spec, we'll use
+blockchain interchangeably with the Bitcoin blockchain. However this protocol can be 
+applied to most other blockchains with relatively minimal modification. 
+
+An **engraving** is the representation of a document on the blockchain. An **uploader 
+writer** orchestrates his transactions to create an engraving on the blockchain in a way 
+that can be read by any **reader clients** who can view the blockchain. A document can
+have zero, one, or multiple engravings on a given blockchain. As long as at least one 
+engraving is complete, reader clients can reconstruct the document.
+
+## Document Address
 
 A **document hash** is the cryptographic hash of the document using the blockchain's native 
 hasing primitive (SHA256 for Bitcoin). A **document address** is the blockchain address 
-determinstically derived from the document's hash. The 
+determinstically derived from the document's hash. 
 
-The purpose of using this address is to prevent forgeries or spam attacks. After reconstructing 
-a document, the client can verify that its contents hash to the source address. If not, that 
-specific read can be discarded as forged or erroenous.
+The document address is the canonical location of the document on the blockchain. No matter
+where, when, by who, or how many times an engraving was made, a reader client simply needs
+to know the hash of the data they want to read. As long as at least one engraving
+exists the document can be deterministically reconstructed.
 
-After being engraved into the blockchain, the user can reconstruct the original document
-given:
-
-* The document's hash
-* Read access to the blockchain
-
-## Dimunitive Address
+The address also serves as a way to prove authenticity, preventing forgeries, errors and spam
+attacks. If an engraving is incorrect, either because of malice or error, then the hash of
+its reconstruction will not match the address it maps to. In which case the client can discard
+it, and find an authentic engraving (if any exist).
 
 A **dimunitive address** is the address mapping to the first N-bits of the document hash.
 The 92-bit dimunitive address is the address derived from the first 92-bits of the SHA256
@@ -37,46 +46,55 @@ hash, with the trailing bits set to 0. A 256-bit hash has 255 defined dimunitive
 
 The purpose of dimunitive addresses are to allowed documents to be located and shared using
 fewer number of bits. At the cost of potentially higher probability of collission. However
-in the case of collission, the client can always retry with more bits. 
+in the case of collission, the client can always query with more bits. 
 
-## Encoding Chunks
+## Chunks
 
-Documents are divisible into **chunks**, which are sub-units of data small enough to fit within
-a single transaction. A **chunk scheme** is metadata that describes how to encode and decode
-a document to and from a set of chunks. A document and chunk scheme uniquely define a **chunk
-set**. All chunks within a chunk set are unique, allowing for the same chunk to be duplicated
-in a dataset without fear of corrupting the document reconstruction.
+Engravings divide a document's data up into **chunks**, which are sub-units of data small 
+enough to fit within a single transaction. A chunk contains both a segment of data from the 
+document as well as encoding metadata specific to that chunk.
 
-## Engravings
+A **chunk scheme** is metadata that describes how to encode and decode the document to and 
+from individual chunks. Chunk schemes are one-to-one specific to individual engravings. 
+Individual engravings can have different chunk schemes, even if they're representing the same
+document. It's the responsibility of the reader client to scan the each engraving's chunk 
+individual scheme when reconstructing the document. 
 
-An **engraving** is a deterministically recoverable representation of a chunk set along
-with metadata related to the protocol version and chunk codec. Engravings can be retrieved
-with reference to a single blockchain transaction. A **signed engraving** is an engraving whose
-reference transaction's first output is to the document address. 
+A document and chunk scheme uniquely and deterministically define a **chunk set**. All chunks
+within a chunk are always unique. (Although the document segments themselves do not have to
+be unique. The encoding metadata assures set uniqueness.) This property allows for individual
+chunks to be duplicated in the engraving without requiring resolution or risking data 
+corruption.
 
-Signed engravings prevents forgeries, errors in the protocol or chunk codec mismatches. A user
-reading a document can verify that the recovered document matches the signature. It also
-allows us to canonically query a document regardless of when, where or if an engraving has
-been made.
+#### Fill in Chunk Scheme details
 
-To do so the user takes the document hash, and checks the unspent transactions (if any)
-at the document address. (The document address is the result of a cryptographic hash, and
-therefore transactions at the address are all unspendable.) Going in chronological order
-the user treats each transaction as a potential capstone and uses it to attempt to recover
-the docuent.
+## Anchors
 
-If no transactions are present or no transactions are valid complete capstones, then the user
-concludes that the document has not been engraved. If a forged engraving is presnet, its hash
-won't match the address and can be discarded. If multiple valid engravings are present, then
-the user simply uses the first valid one. This also allows for multiple engravings using different
-chunk codecs. Since the engraving includes this metadata the user can use the available or most
-efficient chunk codec.
+**Anchors** is how reader clients discover engravings (if any) from a document's address.
+Engravings are references by an unspent transaction output (UTXO) at the document address.
+(As a random cryptographic hash, UTXOs at the document address are permanetely unspendable.)
+
+To find an engraving, the reader cliend follows the UTXO back to the candidate. Not all
+candidates will be valid engravings. (Any blockchain user can send a transaction to the 
+document address.) However by checking that the engraving structure is valid, and that
+the engraving's hash matches the address, an authentic anchor (if any exist) will always
+be recovered. Since the cost of blockchain writes are much higher than blockchain reads,
+denial-of-service attacks by faking anchors in the blockchain is infeasible.
+
+**Dimunitive Anchors** are the same concept as anchors, but the UTXO is sent to the 
+document's dimunitive address. The UTXO making up the dimunitive anchor always occurs on
+a transaction shared with a regular anchor. Reader clients must take care to verify that
+the paired addresses represent a valid canonical/dimunitive pair, to avoid forgery attacks.
+
+As long as an an anchor to an authentic engraving exists at the canonical document address,
+this validates the dimunitive by definition. If the subset engraving hashes to the document's
+hash, then the subset of bits will in turn hash to the dimunitive.
 
 ## Capstone Transaction
 
-The engraving's reference transaction is a **capstone transaction**. Using it a reader can
-determistically and in bounded time retrieve each chunk's constituent transaction. Keystone
-transactions must conform to a specific structure to be considered valid:
+The transaction in the engraving that outputs the anchor is the **capstone transaction**. 
+Using it a reader can determistically and in bounded time retrieve each chunk's constituent 
+transaction. Capstone transactions must conform to a specific structure to be considered valid:
 
 * Inputs - Complete set of root transactions for the scroll (see below) in the engraving. Must
   only contain ribbon root transactions. 
